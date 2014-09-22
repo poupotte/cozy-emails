@@ -17,7 +17,7 @@ describe "Accounts Tests", ->
                 res.statusCode.should.equal 200
                 done()
 
-        it "And I post a new account to /accounts", (done) ->
+        it "And I post a new account to /accounts", (done) =>
             @timeout 10000
             account = helpers.imapServerAccount()
             client.post '/account', account, (err, res, body) =>
@@ -27,7 +27,7 @@ describe "Accounts Tests", ->
                 @mailboxID = body.mailboxes[0].id
                 done()
 
-        it "And I update an account", (done) ->
+        it "And I update an account", (done) =>
             changes = label: "New Name"
             client.put "/account/#{@accountID}", changes, (err, res, body) =>
                 res.statusCode.should.equal 200
@@ -56,17 +56,19 @@ describe "Accounts Tests", ->
         it "When I recover account list", ->
             client.get '/account', (err, res, body) =>
                 res.statusCode.should.equal 200
-                console.log body
                 @body = body
                 done()
 
         it "Then list should be contained new account", ->
-            consolle.log @body[0]
+            @body.should.have.lengthOf 3
+            @body[0].label.should.equal "New Name"
+            @body[1].label.should.equal "Dovecot"
+            @body[2].label.should.equal "Gmail"
 
 
     describe "Account removal", ->
 
-        it "When I delete an account", (done) ->
+        it "When I delete an account", (done) =>
             client.del "/account/#{@accountID}", (err, res, body) =>
                 res.statusCode.should.equal 204
                 done()
