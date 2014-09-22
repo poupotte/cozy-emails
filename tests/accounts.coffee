@@ -54,7 +54,7 @@ describe "Accounts Tests", ->
     describe "Account recovering", ->
 
         it "When I recover account list", ->
-            client.get '/accounts', (err, res, body) =>
+            client.get '/account', (err, res, body) =>
                 res.statusCode.should.equal 200
                 console.log body
                 @body = body
