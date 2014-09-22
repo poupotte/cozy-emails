@@ -2052,7 +2052,7 @@ textarea:active {
   overflow: hidden;
 /*
     Quick actions bar
-  */
+    */
 }
 #page-content.pushed {
   -webkit-transform: translate(33%);
@@ -2252,13 +2252,10 @@ textarea:active {
   color: #aaa;
   border: 1px solid #aaa;
 }
-.conversation .thread .message .participants {
-  color: #444;
-}
 .conversation .thread .message .participants span {
   display: block;
 }
-.conversation .thread .message .participants span.receivers {
+.conversation .thread .message .participants.receivers {
   color: #bdbdbd;
 }
 .conversation .thread .message .content {
@@ -2278,9 +2275,18 @@ textarea:active {
   margin: 0;
   display: inline;
 }
+.conversation .thread .message .participants {
+  width: 200px;
+  color: #444;
+}
 .conversation .thread .message .hour {
   margin-left: auto;
   color: #444;
+}
+.conversation .thread .message .fa-user {
+  color: #aaa;
+  font-size: 30px;
+  border: 1px solid #aaa;
 }
 .conversation .thread .message:hover:not(.active):not(:last-of-type) {
   background: #f4f4f4;
@@ -2346,11 +2352,11 @@ textarea:active {
   padding: 0;
   background: #363a46;
 /*
-    Menu layout
-  */
+        Menu layout
+    */
 /*
-    Styles
-  */
+        Styles
+    */
 }
 #menu #account-list {
   -webkit-box-flex: 1;
@@ -2494,12 +2500,12 @@ textarea:active {
   align-items: center;
   text-decoration: none;
 }
-.message-list .message a span,
-.message-list .message a .preview {
+.message-list .message span,
+.message-list .message .preview {
   font-size: 13px;
   margin: 0 5px;
 }
-.message-list .message a .preview {
+.message-list .message .preview {
   -webkit-box-flex: 1;
   -moz-box-flex: 1;
   -o-box-flex: 1;
@@ -2514,37 +2520,37 @@ textarea:active {
   text-overflow: ellipsis;
   color: #bdbdbd;
 }
-.message-list .message a .preview .title {
+.message-list .message .preview .title {
   color: #444;
 }
-.message-list .message a .preview p {
+.message-list .message .preview p {
   margin: 0;
   display: inline;
 }
-.message-list .message a .participants {
+.message-list .message .participants {
   width: 200px;
   color: #444;
 }
-.message-list .message a .title {
+.message-list .message .title {
   min-width: 200px;
 }
-.message-list .message a .title:after {
+.message-list .message .title:after {
   content: ' - ';
 }
-.message-list .message a .hour {
+.message-list .message .hour {
   margin-left: auto;
   color: #444;
 }
-.message-list .message a .fa-user {
+.message-list .fa-user {
   color: #aaa;
   font-size: 30px;
   border: 1px solid #aaa;
 }
-.message-list .message:hover {
+.message-list .fa-user:hover {
   border-left: 5px solid #fe8800;
   background: #f4f4f4;
 }
-.message-list .message.active {
+.message-list .fa-user.active {
   border-left: 5px solid #34a6ff;
 }
 #quick-actions .responsive-handler {
@@ -2553,10 +2559,10 @@ textarea:active {
   text-decoration: none;
   cursor: pointer;
 }
-#quick-actions .responsive-handler .fa-bars {
+#quick-actions .fa-bars {
   font-size: 35px;
 }
-#quick-actions .responsive-handler .fa-chevron-left {
+#quick-actions .fa-chevron-left {
   font-size: 30px;
 }
 #quick-actions form {
@@ -2596,14 +2602,15 @@ textarea:active {
 #contextual-actions {
   padding: 0;
 }
-#contextual-actions .mailbox-config.fade-enter {
+#contextual-actions .mailbox-config,
+#contextual-actions.fade-enter {
   -webkit-animation: fadeIn 0.3s ease;
   -moz-animation: fadeIn 0.3s ease;
   -o-animation: fadeIn 0.3s ease;
   -ms-animation: fadeIn 0.3s ease;
   animation: fadeIn 0.3s ease;
 }
-#contextual-actions .mailbox-config.fade-leave {
+#contextual-actions.fade-leave {
   -webkit-animation: fadeIn 0.3s ease reverse;
   -moz-animation: fadeIn 0.3s ease reverse;
   -o-animation: fadeIn 0.3s ease reverse;
@@ -2628,13 +2635,13 @@ textarea:active {
   color: #444;
   margin-top: 0;
 }
-#email-compose h3 a {
+#email-compose a {
   color: #34a6ff;
 }
-#email-compose h3 a.close-email {
+#email-compose a.close-email {
   margin-right: 15px;
 }
-#email-compose h3 a.expand {
+#email-compose a.expand {
   float: right;
   font-size: 25px;
 }
@@ -2645,7 +2652,7 @@ textarea:active {
   text-align: left;
   color: #000;
 }
-#email-compose .attachements {
+.attachements {
   margin: 1em 0;
 }
 /*
@@ -2694,7 +2701,7 @@ textarea:active {
 /*
   EDITOR
 
-  -- 
+  --
 */
 .rt-editor {
   min-height: 4em;

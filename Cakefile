@@ -99,3 +99,57 @@ task 'build', 'Build CoffeeScript to Javascript', ->
         else
             logger.info "Compilation succeeded."
             process.exit 0
+
+
+task "coverage", "Generate code coverage of tests", ->
+    logger.options.prefix = 'cake:coverage'
+    files = walk "tests"
+
+    logger.info "Generating instrumented files..."
+    bin = "./node_modules/.bin/coffeeCoverage --path abbr"
+    command = "mkdir instrumented && " + \
+              "#{bin} server.coffee instrumented/server.js && " + \
+              "#{bin} server instrumented/server"
+    exec command, (err, stdout, stderr) ->
+
+        if err
+            logger.error err
+            cleanCoverage -> process.exit 1
+        else
+            logger.info "Instrumented files generated."
+            env = "COVERAGE=true NODE_ENV=test " + \
+                  "DB_NAME=cozy_test AXON_PORT=9223"
+            command = "#{env} mocha tests/ " + \
+                      "--compilers coffee:coffee-script/register " + \
+                      "--reporter html-cov > coverage/coverage.html"
+            logger.info "Generating code coverage..."
+            exec command, (err, stdout, stderr) ->
+                if err
+                    console.log err
+                    console.log stdout
+                    console.log stderr
+                    logger.error err
+                    cleanCoverage -> process.exit 1
+                else
+                    cleanCoverage ->
+                        logger.info "Code coverage generation succeeded!"
+                        process.exit 0
+
+# use exec-sync npm module and use "invoke" in other tasks
+cleanCoverage = (callback) ->
+    logger.info "Cleaning..."
+    command = "rm -rf instrumented"
+    exec command, (err, stdout, stderr) ->
+        if err
+            logger.error err
+            callback err
+        else
+            logger.info "Cleaned!"
+            callback()
+
+task "clean-coverage", "Clean the files generated for coverage report", ->
+    cleanCoverage (err) ->
+        if err
+            process.exit 1
+        else
+            process.exit 0

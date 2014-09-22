@@ -90,62 +90,16 @@
   globals.require.list = list;
   globals.require.brunch = true;
 })();
-require.register("AppDispatcher", function(exports, require, module) {
-var AppDispatcher, Dispatcher, PayloadSources,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-Dispatcher = require('./libs/flux/dispatcher/Dispatcher');
-
-PayloadSources = require('./constants/AppConstants').PayloadSources;
-
-
-/*
-    Custom dispatcher class to add semantic method.
- */
-
-AppDispatcher = (function(_super) {
-  __extends(AppDispatcher, _super);
-
-  function AppDispatcher() {
-    return AppDispatcher.__super__.constructor.apply(this, arguments);
-  }
-
-  AppDispatcher.prototype.handleViewAction = function(action) {
-    var payload;
-    payload = {
-      source: PayloadSources.VIEW_ACTION,
-      action: action
-    };
-    return this.dispatch(payload);
-  };
-
-  AppDispatcher.prototype.handleServerAction = function(action) {
-    var payload;
-    payload = {
-      source: PayloadSources.SERVER_ACTION,
-      action: action
-    };
-    return this.dispatch(payload);
-  };
-
-  return AppDispatcher;
-
-})(Dispatcher);
-
-module.exports = new AppDispatcher();
-});
-
-;require.register("actions/AccountActionCreator", function(exports, require, module) {
+require.register("actions/account_action_creator", function(exports, require, module) {
 var AccountActionCreator, AccountStore, ActionTypes, AppDispatcher, XHRUtils;
 
-XHRUtils = require('../utils/XHRUtils');
+XHRUtils = require('../utils/xhr_utils');
 
-AppDispatcher = require('../AppDispatcher');
+AppDispatcher = require('../app_dispatcher');
 
-ActionTypes = require('../constants/AppConstants').ActionTypes;
+ActionTypes = require('../constants/app_constants').ActionTypes;
 
-AccountStore = require('../stores/AccountStore');
+AccountStore = require('../stores/account_store');
 
 module.exports = AccountActionCreator = {
   create: function(inputValues) {
@@ -212,24 +166,24 @@ module.exports = AccountActionCreator = {
 };
 });
 
-;require.register("actions/LayoutActionCreator", function(exports, require, module) {
+;require.register("actions/layout_action_creator", function(exports, require, module) {
 var AccountActionCreator, AccountStore, ActionTypes, AlertLevel, AppDispatcher, LayoutActionCreator, LayoutStore, MessageActionCreator, SearchActionCreator, XHRUtils, _ref;
 
-XHRUtils = require('../utils/XHRUtils');
+XHRUtils = require('../utils/xhr_utils');
 
-AccountStore = require('../stores/AccountStore');
+AccountStore = require('../stores/account_store');
 
-LayoutStore = require('../stores/LayoutStore');
+LayoutStore = require('../stores/layout_store');
 
-AppDispatcher = require('../AppDispatcher');
+AppDispatcher = require('../app_dispatcher');
 
-_ref = require('../constants/AppConstants'), ActionTypes = _ref.ActionTypes, AlertLevel = _ref.AlertLevel;
+_ref = require('../constants/app_constants'), ActionTypes = _ref.ActionTypes, AlertLevel = _ref.AlertLevel;
 
-AccountActionCreator = require('./AccountActionCreator');
+AccountActionCreator = require('./account_action_creator');
 
-MessageActionCreator = require('./MessageActionCreator');
+MessageActionCreator = require('./message_action_creator');
 
-SearchActionCreator = require('./SearchActionCreator');
+SearchActionCreator = require('./search_action_creator');
 
 module.exports = LayoutActionCreator = {
   showReponsiveMenu: function() {
@@ -266,13 +220,11 @@ module.exports = LayoutActionCreator = {
     return LayoutActionCreator.alert(AlertLevel.ERROR, message);
   },
   showMessageList: function(panelInfo, direction) {
-    var accountID, mailboxID, numPage;
+    var accountID, mailboxID, page, _ref1;
     LayoutActionCreator.hideReponsiveMenu();
-    accountID = panelInfo.parameters[0];
-    mailboxID = panelInfo.parameters[1];
-    numPage = panelInfo.parameters[2];
+    _ref1 = panelInfo.parameters, accountID = _ref1.accountID, mailboxID = _ref1.mailboxID, page = _ref1.page;
     AccountActionCreator.selectAccount(accountID);
-    return XHRUtils.fetchMessagesByFolder(mailboxID, numPage, function(err, rawMessage) {
+    return XHRUtils.fetchMessagesByFolder(mailboxID, page, function(err, rawMessage) {
       if (err != null) {
         return LayoutActionCreator.alertError(err);
       } else {
@@ -281,8 +233,10 @@ module.exports = LayoutActionCreator = {
     });
   },
   showConversation: function(panelInfo, direction) {
+    var messageID;
     LayoutActionCreator.hideReponsiveMenu();
-    return XHRUtils.fetchConversation(panelInfo.parameters[0], function(err, rawMessage) {
+    messageID = panelInfo.parameters.messageID;
+    return XHRUtils.fetchConversation(messageID, function(err, rawMessage) {
       var selectedAccount;
       if (err != null) {
         return LayoutActionCreator.alertError(err);
@@ -310,7 +264,7 @@ module.exports = LayoutActionCreator = {
   },
   showConfigAccount: function(panelInfo, direction) {
     LayoutActionCreator.hideReponsiveMenu();
-    return AccountActionCreator.selectAccount(panelInfo.parameters[0]);
+    return AccountActionCreator.selectAccount(panelInfo.parameters.accountID);
   },
   showSearch: function(panelInfo, direction) {
     var page, query, _ref1;
@@ -331,14 +285,14 @@ module.exports = LayoutActionCreator = {
 };
 });
 
-;require.register("actions/MessageActionCreator", function(exports, require, module) {
+;require.register("actions/message_action_creator", function(exports, require, module) {
 var ActionTypes, AppDispatcher, XHRUtils;
 
-AppDispatcher = require('../AppDispatcher');
+AppDispatcher = require('../app_dispatcher');
 
-ActionTypes = require('../constants/AppConstants').ActionTypes;
+ActionTypes = require('../constants/app_constants').ActionTypes;
 
-XHRUtils = require('../utils/XHRUtils');
+XHRUtils = require('../utils/xhr_utils');
 
 module.exports = {
   receiveRawMessages: function(messages) {
@@ -367,12 +321,12 @@ module.exports = {
 };
 });
 
-;require.register("actions/SearchActionCreator", function(exports, require, module) {
+;require.register("actions/search_action_creator", function(exports, require, module) {
 var ActionTypes, AppDispatcher, SearchActionCreator;
 
-AppDispatcher = require('../AppDispatcher');
+AppDispatcher = require('../app_dispatcher');
 
-ActionTypes = require('../constants/AppConstants').ActionTypes;
+ActionTypes = require('../constants/app_constants').ActionTypes;
 
 module.exports = SearchActionCreator = {
   setQuery: function(query) {
@@ -403,16 +357,16 @@ module.exports = SearchActionCreator = {
 };
 });
 
-;require.register("actions/SettingsActionCreator", function(exports, require, module) {
+;require.register("actions/settings_action_creator", function(exports, require, module) {
 var ActionTypes, AppDispatcher, SettingsActionCreator, SettingsStore, XHRUtils;
 
-XHRUtils = require('../utils/XHRUtils');
+XHRUtils = require('../utils/xhr_utils');
 
-AppDispatcher = require('../AppDispatcher');
+AppDispatcher = require('../app_dispatcher');
 
-ActionTypes = require('../constants/AppConstants').ActionTypes;
+ActionTypes = require('../constants/app_constants').ActionTypes;
 
-SettingsStore = require('../stores/SettingsStore');
+SettingsStore = require('../stores/settings_store');
 
 module.exports = SettingsActionCreator = {
   edit: function(inputValues) {
@@ -424,6 +378,52 @@ module.exports = SettingsActionCreator = {
 };
 });
 
+;require.register("app_dispatcher", function(exports, require, module) {
+var AppDispatcher, Dispatcher, PayloadSources,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+Dispatcher = require('./libs/flux/dispatcher/dispatcher');
+
+PayloadSources = require('./constants/app_constants').PayloadSources;
+
+
+/*
+    Custom dispatcher class to add semantic method.
+ */
+
+AppDispatcher = (function(_super) {
+  __extends(AppDispatcher, _super);
+
+  function AppDispatcher() {
+    return AppDispatcher.__super__.constructor.apply(this, arguments);
+  }
+
+  AppDispatcher.prototype.handleViewAction = function(action) {
+    var payload;
+    payload = {
+      source: PayloadSources.VIEW_ACTION,
+      action: action
+    };
+    return this.dispatch(payload);
+  };
+
+  AppDispatcher.prototype.handleServerAction = function(action) {
+    var payload;
+    payload = {
+      source: PayloadSources.SERVER_ACTION,
+      action: action
+    };
+    return this.dispatch(payload);
+  };
+
+  return AppDispatcher;
+
+})(Dispatcher);
+
+module.exports = new AppDispatcher();
+});
+
 ;require.register("components/account-config", function(exports, require, module) {
 var AccountActionCreator, button, classer, div, form, h3, input, label, _ref;
 
@@ -431,7 +431,7 @@ _ref = React.DOM, div = _ref.div, h3 = _ref.h3, form = _ref.form, label = _ref.l
 
 classer = React.addons.classSet;
 
-AccountActionCreator = require('../actions/AccountActionCreator');
+AccountActionCreator = require('../actions/account_action_creator');
 
 module.exports = React.createClass({
   displayName: 'AccountConfig',
@@ -619,7 +619,7 @@ var AlertLevel, button, div, span, strong, _ref;
 
 _ref = React.DOM, div = _ref.div, button = _ref.button, span = _ref.span, strong = _ref.strong;
 
-AlertLevel = require('../constants/AppConstants').AlertLevel;
+AlertLevel = require('../constants/app_constants').AlertLevel;
 
 module.exports = React.createClass({
   displayName: 'Alert',
@@ -678,21 +678,21 @@ ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 classer = React.addons.classSet;
 
-RouterMixin = require('../mixins/RouterMixin');
+RouterMixin = require('../mixins/router_mixin');
 
-StoreWatchMixin = require('../mixins/StoreWatchMixin');
+StoreWatchMixin = require('../mixins/store_watch_mixin');
 
-AccountStore = require('../stores/AccountStore');
+AccountStore = require('../stores/account_store');
 
-MessageStore = require('../stores/MessageStore');
+MessageStore = require('../stores/message_store');
 
-LayoutStore = require('../stores/LayoutStore');
+LayoutStore = require('../stores/layout_store');
 
-SettingsStore = require('../stores/SettingsStore');
+SettingsStore = require('../stores/settings_store');
 
-SearchStore = require('../stores/SearchStore');
+SearchStore = require('../stores/search_store');
 
-LayoutActionCreator = require('../actions/LayoutActionCreator');
+LayoutActionCreator = require('../actions/layout_action_creator');
 
 
 /*
@@ -799,10 +799,10 @@ module.exports = Application = React.createClass({
       className: 'row'
     }, div({
       className: panelClasses.firstPanel,
-      key: 'left-panel-' + layout.firstPanel.action + '-' + layout.firstPanel.parameters.join('-')
+      key: 'left-panel-' + layout.firstPanel.action + '-' + Object.keys(layout.firstPanel.parameters).join('-')
     }, this.getPanelComponent(layout.firstPanel, firstPanelLayoutMode)), !isFullWidth && (layout.secondPanel != null) ? div({
       className: panelClasses.secondPanel,
-      key: 'right-panel-' + layout.secondPanel.action + '-' + layout.secondPanel.parameters.join('-')
+      key: 'right-panel-' + layout.secondPanel.action + '-' + Object.keys(layout.secondPanel.parameters).join('-')
     }, this.getPanelComponent(layout.secondPanel, 'second')) : void 0))));
   },
   getPanelClasses: function(isFullWidth) {
@@ -846,11 +846,11 @@ module.exports = Application = React.createClass({
     return classes;
   },
   getPanelComponent: function(panelInfo, layout) {
-    var accountID, accounts, action, conversation, direction, error, firstOfPage, initialAccountConfig, isWaiting, lastOfPage, mailboxID, message, messagesCount, numPerPage, openMessage, otherPanelInfo, pageNum, results, selectedAccount, settings, _ref1;
+    var accountID, accounts, action, conversation, direction, error, firstOfPage, initialAccountConfig, isWaiting, lastOfPage, mailboxID, message, messageID, messagesCount, numPerPage, openMessage, otherPanelInfo, pageNum, results, selectedAccount, settings, _ref1;
     if (panelInfo.action === 'account.mailbox.messages') {
-      accountID = panelInfo.parameters[0];
-      mailboxID = panelInfo.parameters[1];
-      pageNum = (_ref1 = panelInfo.parameters[2]) != null ? _ref1 : 1;
+      accountID = panelInfo.parameters.accountID;
+      mailboxID = panelInfo.parameters.mailboxID;
+      pageNum = (_ref1 = panelInfo.parameters.page) != null ? _ref1 : 1;
       numPerPage = this.state.settings.get('messagesPerPage');
       firstOfPage = (pageNum - 1) * numPerPage;
       lastOfPage = pageNum * numPerPage;
@@ -858,7 +858,7 @@ module.exports = Application = React.createClass({
       direction = layout === 'first' ? 'secondPanel' : 'firstPanel';
       otherPanelInfo = this.props.router.current[direction];
       if ((otherPanelInfo != null ? otherPanelInfo.action : void 0) === 'message') {
-        openMessage = MessageStore.getByID(otherPanelInfo.parameters[0]);
+        openMessage = MessageStore.getByID(otherPanelInfo.parameters.messageID);
       }
       messagesCount = MessageStore.getMessagesCountByMailbox(mailboxID);
       return MessageList({
@@ -901,8 +901,9 @@ module.exports = Application = React.createClass({
         isWaiting: isWaiting
       });
     } else if (panelInfo.action === 'message') {
-      message = MessageStore.getByID(panelInfo.parameters[0]);
-      conversation = MessageStore.getMessagesByConversation(panelInfo.parameters[0]);
+      messageID = panelInfo.parameters.messageID;
+      message = MessageStore.getByID(messageID);
+      conversation = MessageStore.getMessagesByConversation(messageID);
       selectedAccount = this.state.selectedAccount;
       return Conversation({
         message: message,
@@ -930,7 +931,7 @@ module.exports = Application = React.createClass({
     } else if (panelInfo.action === 'search') {
       accountID = null;
       mailboxID = null;
-      pageNum = panelInfo.parameters[1];
+      pageNum = panelInfo.parameters.page;
       numPerPage = this.state.settings.get('messagesPerPage');
       firstOfPage = (pageNum - 1) * numPerPage;
       lastOfPage = pageNum * numPerPage;
@@ -938,7 +939,8 @@ module.exports = Application = React.createClass({
       direction = layout === 'first' ? 'secondPanel' : 'firstPanel';
       otherPanelInfo = this.props.router.current[direction];
       if ((otherPanelInfo != null ? otherPanelInfo.action : void 0) === 'message') {
-        openMessage = MessageStore.getByID(otherPanelInfo.parameters[0]);
+        messageID = otherPanelInfo.parameters.messageID;
+        openMessage = MessageStore.getByID(messageID);
       }
       results = SearchStore.getResults();
       return MessageList({
@@ -977,7 +979,7 @@ module.exports = Application = React.createClass({
     selectedAccountID = (selectedAccount != null ? selectedAccount.get('id') : void 0) || null;
     firstPanelInfo = (_ref1 = this.props.router.current) != null ? _ref1.firstPanel : void 0;
     if ((firstPanelInfo != null ? firstPanelInfo.action : void 0) === 'account.mailbox.messages') {
-      selectedMailboxID = firstPanelInfo.parameters[1];
+      selectedMailboxID = firstPanelInfo.parameters.mailboxID;
     } else {
       selectedMailboxID = null;
     }
@@ -1026,19 +1028,19 @@ classer = React.addons.classSet;
 
 FilePicker = require('./file-picker');
 
-AccountStore = require('../stores/AccountStore');
+AccountStore = require('../stores/account_store');
 
-SettingsStore = require('../stores/SettingsStore');
+SettingsStore = require('../stores/settings_store');
 
-ComposeActions = require('../constants/AppConstants').ComposeActions;
+ComposeActions = require('../constants/app_constants').ComposeActions;
 
-MessageUtils = require('../utils/MessageUtils');
+MessageUtils = require('../utils/message_utils');
 
-LayoutActionCreator = require('../actions/LayoutActionCreator');
+LayoutActionCreator = require('../actions/layout_action_creator');
 
-MessageActionCreator = require('../actions/MessageActionCreator');
+MessageActionCreator = require('../actions/message_action_creator');
 
-RouterMixin = require('../mixins/RouterMixin');
+RouterMixin = require('../mixins/router_mixin');
 
 module.exports = Compose = React.createClass({
   displayName: 'Compose',
@@ -1449,7 +1451,7 @@ Message = require('./message');
 
 classer = React.addons.classSet;
 
-RouterMixin = require('../mixins/RouterMixin');
+RouterMixin = require('../mixins/router_mixin');
 
 module.exports = React.createClass({
   displayName: 'Conversation',
@@ -1540,7 +1542,7 @@ var FileItem, FilePicker, MessageUtils, a, div, form, i, input, li, span, ul, _r
 
 _ref = React.DOM, div = _ref.div, form = _ref.form, input = _ref.input, ul = _ref.ul, li = _ref.li, span = _ref.span, i = _ref.i, a = _ref.a;
 
-MessageUtils = require('../utils/MessageUtils');
+MessageUtils = require('../utils/message_utils');
 
 
 /*
@@ -1788,7 +1790,7 @@ var RouterMixin, a, button, div, li, span, ul, _ref;
 
 _ref = React.DOM, div = _ref.div, ul = _ref.ul, li = _ref.li, span = _ref.span, a = _ref.a, button = _ref.button;
 
-RouterMixin = require('../mixins/RouterMixin');
+RouterMixin = require('../mixins/router_mixin');
 
 module.exports = React.createClass({
   displayName: 'MailboxList',
@@ -1848,9 +1850,9 @@ _ref = React.DOM, div = _ref.div, ul = _ref.ul, li = _ref.li, a = _ref.a, span =
 
 classer = React.addons.classSet;
 
-RouterMixin = require('../mixins/RouterMixin');
+RouterMixin = require('../mixins/router_mixin');
 
-AccountStore = require('../stores/AccountStore');
+AccountStore = require('../stores/account_store');
 
 module.exports = Menu = React.createClass({
   displayName: 'Menu',
@@ -1994,9 +1996,9 @@ _ref = React.DOM, div = _ref.div, ul = _ref.ul, li = _ref.li, a = _ref.a, span =
 
 classer = React.addons.classSet;
 
-RouterMixin = require('../mixins/RouterMixin');
+RouterMixin = require('../mixins/router_mixin');
 
-MessageUtils = require('../utils/MessageUtils');
+MessageUtils = require('../utils/message_utils');
 
 module.exports = React.createClass({
   displayName: 'MessageList',
@@ -2133,13 +2135,13 @@ Compose = require('./compose');
 
 FilePicker = require('./file-picker');
 
-MessageUtils = require('../utils/MessageUtils');
+MessageUtils = require('../utils/message_utils');
 
-ComposeActions = require('../constants/AppConstants').ComposeActions;
+ComposeActions = require('../constants/app_constants').ComposeActions;
 
-LayoutActionCreator = require('../actions/LayoutActionCreator');
+LayoutActionCreator = require('../actions/layout_action_creator');
 
-AccountStore = require('../stores/AccountStore');
+AccountStore = require('../stores/account_store');
 
 classer = React.addons.classSet;
 
@@ -2441,11 +2443,11 @@ _ref = React.DOM, div = _ref.div, input = _ref.input, span = _ref.span;
 
 classer = React.addons.classSet;
 
-SearchActionCreator = require('../actions/SearchActionCreator');
+SearchActionCreator = require('../actions/search_action_creator');
 
 ENTER_KEY = 13;
 
-RouterMixin = require('../mixins/RouterMixin');
+RouterMixin = require('../mixins/router_mixin');
 
 module.exports = React.createClass({
   displayName: 'SearchForm',
@@ -2501,9 +2503,9 @@ _ref = React.DOM, div = _ref.div, h3 = _ref.h3, form = _ref.form, label = _ref.l
 
 classer = React.addons.classSet;
 
-SettingsActionCreator = require('../actions/SettingsActionCreator');
+SettingsActionCreator = require('../actions/settings_action_creator');
 
-SettingsStore = require('../stores/SettingsStore');
+SettingsStore = require('../stores/settings_store');
 
 module.exports = React.createClass({
   displayName: 'AccountConfig',
@@ -2571,7 +2573,7 @@ module.exports = React.createClass({
 });
 });
 
-;require.register("constants/AppConstants", function(exports, require, module) {
+;require.register("constants/app_constants", function(exports, require, module) {
 module.exports = {
   ActionTypes: {
     'ADD_ACCOUNT': 'ADD_ACCOUNT',
@@ -2628,11 +2630,11 @@ window.onload = function() {
   polyglot = new Polyglot();
   polyglot.extend(locales);
   window.t = polyglot.t.bind(polyglot);
-  AccountStore = require('./stores/AccountStore');
-  LayoutStore = require('./stores/LayoutStore');
-  MessageStore = require('./stores/MessageStore');
-  SettingsStore = require('./stores/SettingsStore');
-  SearchStore = require('./stores/SearchStore');
+  AccountStore = require('./stores/account_store');
+  LayoutStore = require('./stores/layout_store');
+  MessageStore = require('./stores/message_store');
+  SettingsStore = require('./stores/settings_store');
+  SearchStore = require('./stores/search_store');
   Router = require('./router');
   this.router = new Router();
   window.router = this.router;
@@ -2648,252 +2650,12 @@ window.onload = function() {
 };
 });
 
-;require.register("libs/PanelRouter", function(exports, require, module) {
-
-/*
-    Routing component. We let Backbone handling browser stuff
-    and we format the varying parts of the layout.
-
-    URLs are built in the following way:
-        - a first part that represents the first panel
-        - a second part that represents the second panel
-        - if there is just one part, it represents a full width panel
-
-    Since Backbone.Router only handles one part, routes initialization mechanism
-    is overriden so we can post-process the second part of the URL.
-
-    Example: a defined pattern will generates two routes.
-        - `mailbox/a/path/:id`
-        - `mailbox/a/path/:id/*secondPanel`
-
-        Each pattern is actually the pattern itself plus the pattern itself and
-        another pattern.
- */
-var LayoutActionCreator, Router,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-LayoutActionCreator = require('../actions/LayoutActionCreator');
-
-module.exports = Router = (function(_super) {
-  __extends(Router, _super);
-
-  function Router() {
-    return Router.__super__.constructor.apply(this, arguments);
-  }
-
-  Router.prototype.patterns = {};
-
-  Router.prototype.routes = {};
-
-  Router.prototype.previous = null;
-
-  Router.prototype.current = null;
-
-  Router.prototype.cachedPatterns = [];
-
-  Router.prototype.initialize = function(options) {
-    var key, route, _ref;
-    _ref = this.patterns;
-    for (key in _ref) {
-      route = _ref[key];
-      this.cachedPatterns.push({
-        key: key,
-        pattern: this._routeToRegExp(route.pattern)
-      });
-      this.routes[route.pattern] = key;
-      this.routes["" + route.pattern + "/*secondPanel"] = key;
-    }
-    this._bindRoutes();
-    return this.on('route', (function(_this) {
-      return function(name, args) {
-        var firstAction, firstPanelInfo, secondAction, secondPanelInfo, _ref1;
-        _ref1 = _this._processSubRouting(name, args), firstPanelInfo = _ref1[0], secondPanelInfo = _ref1[1];
-        firstAction = _this.fluxActionFactory(firstPanelInfo);
-        secondAction = _this.fluxActionFactory(secondPanelInfo);
-        _this.previous = _this.current;
-        _this.current = {
-          firstPanel: firstPanelInfo,
-          secondPanel: secondPanelInfo
-        };
-        if (firstAction != null) {
-          firstAction(firstPanelInfo, 'first');
-        }
-        if (secondAction != null) {
-          secondAction(secondPanelInfo, 'second');
-        }
-        return _this.trigger('fluxRoute', _this.current);
-      };
-    })(this));
-  };
-
-
-  /*
-      Gets the Flux action to execute given a panel info.
-   */
-
-  Router.prototype.fluxActionFactory = function(panelInfo) {
-    var fluxAction, pattern;
-    fluxAction = null;
-    pattern = this.patterns[panelInfo != null ? panelInfo.action : void 0];
-    if (pattern != null) {
-      fluxAction = LayoutActionCreator[pattern.fluxAction];
-      if (fluxAction == null) {
-        console.warn(("`" + pattern.fluxAction + "` method not found in ") + "layout actions.");
-      }
-      return fluxAction;
-    }
-  };
-
-
-  /*
-      Extracts and matches the second part of the URl if it exists.
-   */
-
-  Router.prototype._processSubRouting = function(name, args) {
-    var firstPanelInfo, firstPanelParameters, params, route, secondPanelInfo, secondPanelString;
-    args.pop();
-    secondPanelString = args.pop();
-    params = this.patterns[name].pattern.match(/:[\w]+/g) || [];
-    if (params.length > args.length && (secondPanelString != null)) {
-      args.push(secondPanelString);
-      secondPanelString = null;
-    }
-    firstPanelParameters = args;
-    route = _.first(_.filter(this.cachedPatterns, function(element) {
-      return element.pattern.test(secondPanelString);
-    }));
-    if (route != null) {
-      args = this._extractParameters(route.pattern, secondPanelString);
-      args.pop();
-      secondPanelInfo = {
-        action: route.key,
-        parameters: args
-      };
-    } else {
-      secondPanelInfo = null;
-    }
-    firstPanelInfo = {
-      action: name,
-      parameters: firstPanelParameters
-    };
-    return [firstPanelInfo, secondPanelInfo];
-  };
-
-
-  /*
-      Builds a route from panel information.
-      Two modes:
-          - options has firstPanel and/or secondPanel attributes with the
-            panel(s) information.
-          - options has the panel information along a `direction` attribute
-            that can be `first` or `second`. It's the short version.
-   */
-
-  Router.prototype.buildUrl = function(options) {
-    var firstPanelInfo, firstPart, isFirstDirection, secondPanelInfo, secondPart, url;
-    if ((options.firstPanel != null) || (options.secondPanel != null)) {
-      firstPanelInfo = options.firstPanel || this.current.firstPanel;
-      secondPanelInfo = options.secondPanel || this.current.secondPanel;
-    } else {
-      if (options.direction != null) {
-        if (options.direction === 'first') {
-          firstPanelInfo = options;
-          secondPanelInfo = this.current.secondPanel;
-        } else if (options.direction === 'second') {
-          firstPanelInfo = this.current.firstPanel;
-          secondPanelInfo = options;
-        } else {
-          console.warn('`direction` should be `first`, `second`.');
-        }
-      } else {
-        console.warn('`direction` parameter is mandatory when ' + 'using short call.');
-      }
-    }
-    isFirstDirection = (options.firstPanel != null) || options.direction === 'first';
-    if (isFirstDirection && options.fullWidth) {
-      if ((options.secondPanel != null) && options.direction === 'second') {
-        console.warn("You shouldn't use the fullWidth option with " + "a second panel");
-      }
-      secondPanelInfo = null;
-    }
-    firstPart = this._getURLFromRoute(firstPanelInfo);
-    secondPart = this._getURLFromRoute(secondPanelInfo);
-    url = "#" + firstPart;
-    if ((secondPart != null) && secondPart.length > 0) {
-      url = "" + url + "/" + secondPart;
-    }
-    return url;
-  };
-
-
-  /*
-      Closes a panel given a direction. If a full-width panel is closed,
-      the URL points to the default route.
-   */
-
-  Router.prototype.buildClosePanelUrl = function(direction) {
-    var panelInfo;
-    if (direction === 'first' || direction === 'full') {
-      panelInfo = _.clone(this.current.secondPanel);
-    } else {
-      panelInfo = _.clone(this.current.firstPanel);
-    }
-    if (panelInfo != null) {
-      panelInfo.direction = 'first';
-      panelInfo.fullWidth = true;
-      return this.buildUrl(panelInfo);
-    } else {
-      return '#';
-    }
-  };
-
-  Router.prototype._getURLFromRoute = function(panel) {
-    var defaultParameter, defaultParameters, filledPattern, key, paramInPattern, paramValue, parametersInPattern, pattern, _i, _j, _len, _len1;
-    panel = _.clone(panel);
-    if (panel != null) {
-      pattern = this.patterns[panel.action].pattern;
-      if ((panel.parameters != null) && !(panel.parameters instanceof Array)) {
-        panel.parameters = [panel.parameters];
-      }
-      if ((defaultParameters = this._getDefaultParameters(panel.action)) != null) {
-        if ((panel.parameters == null) || panel.parameters.length === 0) {
-          panel.parameters = defaultParameters;
-        } else {
-          for (key = _i = 0, _len = defaultParameters.length; _i < _len; key = ++_i) {
-            defaultParameter = defaultParameters[key];
-            if (panel.parameters[key] == null) {
-              panel.parameters.splice(key, 0, defaultParameter);
-            }
-          }
-        }
-      }
-      parametersInPattern = pattern.match(/:[\w]+/gi) || [];
-      filledPattern = pattern;
-      if (panel.parameters) {
-        for (key = _j = 0, _len1 = parametersInPattern.length; _j < _len1; key = ++_j) {
-          paramInPattern = parametersInPattern[key];
-          paramValue = panel.parameters[key];
-          filledPattern = filledPattern.replace(paramInPattern, paramValue);
-        }
-      }
-      return filledPattern;
-    } else {
-      return '';
-    }
-  };
-
-  return Router;
-
-})(Backbone.Router);
-});
-
 ;require.register("libs/flux/dispatcher/Dispatcher", function(exports, require, module) {
 
 /*
 
-    -- Coffee port of Facebook's flux dispatcher. It was in ES6 and I haven't been
-    successful in adding a transpiler. --
+    -- Coffee port of Facebook's flux dispatcher. It was in ES6 and I haven't
+    been successful in adding a transpiler. --
 
     Copyright (c) 2014, Facebook, Inc.
     All rights reserved.
@@ -2921,8 +2683,8 @@ module.exports = Dispatcher = Dispatcher = (function() {
 
 
   /*
-      Registers a callback to be invoked with every dispatched payload. Returns
-      a token that can be used with `waitFor()`.
+      Registers a callback to be invoked with every dispatched payload.
+      Returns a token that can be used with `waitFor()`.
   
       @param {function} callback
       @return {string}
@@ -2943,30 +2705,34 @@ module.exports = Dispatcher = Dispatcher = (function() {
    */
 
   Dispatcher.prototype.unregister = function(id) {
-    invariant(this._callbacks[id], 'Dispatcher.unregister(...): `%s` does not map to a registered callback.', id);
+    var message;
+    message = 'Dispatcher.unregister(...): `%s` does not map to a ' + 'registered callback.';
+    invariant(this._callbacks[id], message, id);
     return delete this._callbacks[id];
   };
 
 
   /*
-      Waits for the callbacks specified to be invoked before continuing execution
-      of the current callback. This method should only be used by a callback in
-      response to a dispatched payload.
+      Waits for the callbacks specified to be invoked before continuing
+      execution of the current callback. This method should only be used by a
+      callback in response to a dispatched payload.
   
       @param {array<string>} ids
    */
 
   Dispatcher.prototype.waitFor = function(ids) {
-    var id, ii, _i, _ref, _results;
+    var id, ii, message, message2, _i, _ref, _results;
     invariant(this._isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
+    message = 'Dispatcher.waitFor(...): Circular dependency detected ' + 'while waiting for `%s`.';
+    message2 = 'Dispatcher.waitFor(...): `%s` does not map to a ' + 'registered callback.';
     _results = [];
     for (ii = _i = 0, _ref = ids.length - 1; _i <= _ref; ii = _i += 1) {
       id = ids[ii];
       if (this._isPending[id]) {
-        invariant(this._isHandled[id], 'Dispatcher.waitFor(...): Circular dependency detected while waiting for `%s`.', id);
+        invariant(this._isHandled[id], message, id);
         continue;
       }
-      invariant(this._callbacks[id], 'Dispatcher.waitFor(...): `%s` does not map to a registered callback.', id);
+      invariant(this._callbacks[id], message2, id);
       _results.push(this._invokeCallback(id));
     }
     return _results;
@@ -2980,8 +2746,184 @@ module.exports = Dispatcher = Dispatcher = (function() {
    */
 
   Dispatcher.prototype.dispatch = function(payload) {
-    var id, _results;
-    invariant(!this._isDispatching, 'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.');
+    var id, message, _results;
+    message = 'Dispatch.dispatch(...): Cannot dispatch in the middle ' + 'of a dispatch.';
+    invariant(!this._isDispatching, message);
+    this._startDispatching(payload);
+    try {
+      _results = [];
+      for (id in this._callbacks) {
+        if (this._isPending[id]) {
+          continue;
+        }
+        _results.push(this._invokeCallback(id));
+      }
+      return _results;
+    } finally {
+      this._stopDispatching();
+    }
+  };
+
+
+  /*
+      Is this Dispatcher currently dispatching.
+  
+      @return {boolean}
+   */
+
+  Dispatcher.prototype.isDispatching = function() {
+    return this._isDispatching;
+  };
+
+
+  /*
+      Call the callback stored with the given id. Also do some internal
+      bookkeeping.
+  
+      @param {string} id
+      @internal
+   */
+
+  Dispatcher.prototype._invokeCallback = function(id) {
+    this._isPending[id] = true;
+    this._callbacks[id](this._pendingPayload);
+    return this._isHandled[id] = true;
+  };
+
+
+  /*
+      Set up bookkeeping needed when dispatching.
+  
+      @param {object} payload
+      @internal
+   */
+
+  Dispatcher.prototype._startDispatching = function(payload) {
+    var id;
+    for (id in this._callbacks) {
+      this._isPending[id] = false;
+      this._isHandled[id] = false;
+    }
+    this._pendingPayload = payload;
+    return this._isDispatching = true;
+  };
+
+
+  /*
+      Clear bookkeeping used for dispatching.
+  
+      @internal
+   */
+
+  Dispatcher.prototype._stopDispatching = function() {
+    this._pendingPayload = null;
+    return this._isDispatching = false;
+  };
+
+  return Dispatcher;
+
+})();
+});
+
+;require.register("libs/flux/dispatcher/dispatcher", function(exports, require, module) {
+
+/*
+
+    -- Coffee port of Facebook's flux dispatcher. It was in ES6 and I haven't
+    been successful in adding a transpiler. --
+
+    Copyright (c) 2014, Facebook, Inc.
+    All rights reserved.
+
+    This source code is licensed under the BSD-style license found in the
+    LICENSE file in the root directory of this source tree. An additional grant
+    of patent rights can be found in the PATENTS file in the same directory.
+ */
+var Dispatcher, invariant, _lastID, _prefix;
+
+invariant = require('../invariant');
+
+_lastID = 1;
+
+_prefix = 'ID_';
+
+module.exports = Dispatcher = Dispatcher = (function() {
+  function Dispatcher() {
+    this._callbacks = {};
+    this._isPending = {};
+    this._isHandled = {};
+    this._isDispatching = false;
+    this._pendingPayload = null;
+  }
+
+
+  /*
+      Registers a callback to be invoked with every dispatched payload.
+      Returns a token that can be used with `waitFor()`.
+  
+      @param {function} callback
+      @return {string}
+   */
+
+  Dispatcher.prototype.register = function(callback) {
+    var id;
+    id = _prefix + _lastID++;
+    this._callbacks[id] = callback;
+    return id;
+  };
+
+
+  /*
+      Removes a callback based on its token.
+  
+      @param {string} id
+   */
+
+  Dispatcher.prototype.unregister = function(id) {
+    var message;
+    message = 'Dispatcher.unregister(...): `%s` does not map to a ' + 'registered callback.';
+    invariant(this._callbacks[id], message, id);
+    return delete this._callbacks[id];
+  };
+
+
+  /*
+      Waits for the callbacks specified to be invoked before continuing
+      execution of the current callback. This method should only be used by a
+      callback in response to a dispatched payload.
+  
+      @param {array<string>} ids
+   */
+
+  Dispatcher.prototype.waitFor = function(ids) {
+    var id, ii, message, message2, _i, _ref, _results;
+    invariant(this._isDispatching, 'Dispatcher.waitFor(...): Must be invoked while dispatching.');
+    message = 'Dispatcher.waitFor(...): Circular dependency detected ' + 'while waiting for `%s`.';
+    message2 = 'Dispatcher.waitFor(...): `%s` does not map to a ' + 'registered callback.';
+    _results = [];
+    for (ii = _i = 0, _ref = ids.length - 1; _i <= _ref; ii = _i += 1) {
+      id = ids[ii];
+      if (this._isPending[id]) {
+        invariant(this._isHandled[id], message, id);
+        continue;
+      }
+      invariant(this._callbacks[id], message2, id);
+      _results.push(this._invokeCallback(id));
+    }
+    return _results;
+  };
+
+
+  /*
+      Dispatches a payload to all registered callbacks.
+  
+      @param {object} payload
+   */
+
+  Dispatcher.prototype.dispatch = function(payload) {
+    var id, message, _results;
+    message = 'Dispatch.dispatch(...): Cannot dispatch in the middle ' + 'of a dispatch.';
+    invariant(!this._isDispatching, message);
     this._startDispatching(payload);
     try {
       _results = [];
@@ -3114,12 +3056,12 @@ var invariant = function(condition, format, a, b, c, d, e, f) {
 module.exports = invariant;
 });
 
-;require.register("libs/flux/store/Store", function(exports, require, module) {
+require.register("libs/flux/store/Store", function(exports, require, module) {
 var AppDispatcher, Store,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-AppDispatcher = require('../../../AppDispatcher');
+AppDispatcher = require('../../../app_dispatcher');
 
 module.exports = Store = (function(_super) {
   var _addHandlers, _handlers, _nextUniqID, _processBinding;
@@ -3159,14 +3101,360 @@ module.exports = Store = (function(_super) {
   }
 
   Store.prototype.__bindHandlers = function(handle) {
+    var message;
     if (__DEV__) {
-      throw new Error("The store " + this.constructor.name + " must define a `__bindHandlers` method");
+      message = ("The store " + this.constructor.name + " must define a ") + "`__bindHandlers` method";
+      throw new Error(message);
     }
   };
 
   return Store;
 
 })(EventEmitter);
+});
+
+;require.register("libs/flux/store/store", function(exports, require, module) {
+var AppDispatcher, Store,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+AppDispatcher = require('../../../app_dispatcher');
+
+module.exports = Store = (function(_super) {
+  var _addHandlers, _handlers, _nextUniqID, _processBinding;
+
+  __extends(Store, _super);
+
+  Store.prototype.uniqID = null;
+
+  _nextUniqID = 0;
+
+  _handlers = {};
+
+  _addHandlers = function(type, callback) {
+    if (_handlers[this.uniqID] == null) {
+      _handlers[this.uniqID] = {};
+    }
+    return _handlers[this.uniqID][type] = callback;
+  };
+
+  _processBinding = function() {
+    return this.dispatchToken = AppDispatcher.register((function(_this) {
+      return function(payload) {
+        var callback, type, value, _ref;
+        _ref = payload.action, type = _ref.type, value = _ref.value;
+        if ((callback = _handlers[_this.uniqID][type]) != null) {
+          return callback.call(_this, value);
+        }
+      };
+    })(this));
+  };
+
+  function Store() {
+    Store.__super__.constructor.call(this);
+    this.uniqID = _nextUniqID++;
+    this.__bindHandlers(_addHandlers.bind(this));
+    _processBinding.call(this);
+  }
+
+  Store.prototype.__bindHandlers = function(handle) {
+    var message;
+    if (__DEV__) {
+      message = ("The store " + this.constructor.name + " must define a ") + "`__bindHandlers` method";
+      throw new Error(message);
+    }
+  };
+
+  return Store;
+
+})(EventEmitter);
+});
+
+;require.register("libs/panel_router", function(exports, require, module) {
+
+/*
+    Routing component. We let Backbone handling browser stuff
+    and we format the varying parts of the layout.
+
+    URLs are built in the following way:
+        - a first part that represents the first panel
+        - a second part that represents the second panel
+        - if there is just one part, it represents a full width panel
+
+    Since Backbone.Router only handles one part, routes initialization mechanism
+    is overriden so we can post-process the second part of the URL.
+
+    Example: a defined pattern will generates two routes.
+        - `mailbox/a/path/:id`
+        - `mailbox/a/path/:id/*secondPanel`
+
+        Each pattern is actually the pattern itself plus the pattern itself and
+        another pattern.
+ */
+var LayoutActionCreator, Router,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+LayoutActionCreator = require('../actions/layout_action_creator');
+
+module.exports = Router = (function(_super) {
+  __extends(Router, _super);
+
+  function Router() {
+    return Router.__super__.constructor.apply(this, arguments);
+  }
+
+  Router.prototype.patterns = {};
+
+  Router.prototype.routes = {};
+
+  Router.prototype.previous = null;
+
+  Router.prototype.current = null;
+
+  Router.prototype.cachedPatterns = [];
+
+  Router.prototype.initialize = function(options) {
+    var key, route, _ref;
+    _ref = this.patterns;
+    for (key in _ref) {
+      route = _ref[key];
+      this.cachedPatterns.push({
+        key: key,
+        pattern: this._routeToRegExp(route.pattern)
+      });
+      this.routes[route.pattern] = key;
+      this.routes["" + route.pattern + "/*secondPanel"] = key;
+    }
+    this._bindRoutes();
+    return this.on('route', (function(_this) {
+      return function(name, args) {
+        var firstAction, firstPanelInfo, secondAction, secondPanelInfo, _ref1;
+        _ref1 = _this._processSubRouting(name, args), firstPanelInfo = _ref1[0], secondPanelInfo = _ref1[1];
+        firstAction = _this.fluxActionFactory(firstPanelInfo);
+        secondAction = _this.fluxActionFactory(secondPanelInfo);
+        _this.previous = _this.current;
+        _this.current = {
+          firstPanel: firstPanelInfo,
+          secondPanel: secondPanelInfo
+        };
+        if (firstAction != null) {
+          firstAction(firstPanelInfo, 'first');
+        }
+        if (secondAction != null) {
+          secondAction(secondPanelInfo, 'second');
+        }
+        return _this.trigger('fluxRoute', _this.current);
+      };
+    })(this));
+  };
+
+
+  /*
+      Gets the Flux action to execute given a panel info.
+   */
+
+  Router.prototype.fluxActionFactory = function(panelInfo) {
+    var fluxAction, pattern;
+    fluxAction = null;
+    pattern = this.patterns[panelInfo != null ? panelInfo.action : void 0];
+    if (pattern != null) {
+      fluxAction = LayoutActionCreator[pattern.fluxAction];
+      if (fluxAction == null) {
+        console.warn(("`" + pattern.fluxAction + "` method not found in ") + "layout actions.");
+      }
+      return fluxAction;
+    }
+  };
+
+
+  /*
+      Extracts and matches the second part of the URl if it exists.
+   */
+
+  Router.prototype._processSubRouting = function(name, args) {
+    var firstPanelInfo, firstPanelParameters, params, route, secondPanelInfo, secondPanelString;
+    args.pop();
+    secondPanelString = args.pop();
+    params = this.patterns[name].pattern.match(/:[\w]+/g) || [];
+    if (params.length > args.length && (secondPanelString != null)) {
+      args.push(secondPanelString);
+      secondPanelString = null;
+    }
+    firstPanelParameters = this._arrayToNamedParameters(name, args);
+    route = _.first(_.filter(this.cachedPatterns, function(element) {
+      return element.pattern.test(secondPanelString);
+    }));
+    if (route != null) {
+      args = this._extractParameters(route.pattern, secondPanelString);
+      args.pop();
+      secondPanelInfo = this._mergeDefaultParameter({
+        action: route.key,
+        parameters: this._arrayToNamedParameters(route.key, args)
+      });
+    } else {
+      secondPanelInfo = null;
+    }
+    firstPanelInfo = this._mergeDefaultParameter({
+      action: name,
+      parameters: firstPanelParameters
+    });
+    return [firstPanelInfo, secondPanelInfo];
+  };
+
+
+  /*
+      Turns a parameters array into an object of named parameters
+   */
+
+  Router.prototype._arrayToNamedParameters = function(patternName, parametersArray) {
+    var index, namedParameters, paramName, parametersName, unPrefixedParamName, _i, _len;
+    namedParameters = {};
+    parametersName = this.patterns[patternName].pattern.match(/:[\w]+/g) || [];
+    for (index = _i = 0, _len = parametersName.length; _i < _len; index = ++_i) {
+      paramName = parametersName[index];
+      unPrefixedParamName = paramName.substr(1);
+      namedParameters[unPrefixedParamName] = parametersArray[index];
+    }
+    return namedParameters;
+  };
+
+
+  /*
+      Turns a parameters array into an object of named parameters
+   */
+
+  Router.prototype._namedParametersToArray = function(patternName, namedParameters) {
+    var index, paramName, parametersArray, parametersName, unPrefixedParamName, _i, _len;
+    parametersArray = [];
+    parametersName = this.patterns[patternName].pattern.match(/:[\w]+/g) || [];
+    for (index = _i = 0, _len = parametersName.length; _i < _len; index = ++_i) {
+      paramName = parametersName[index];
+      unPrefixedParamName = paramName.substr(1);
+      parametersArray.push(namedParameters[paramName]);
+    }
+    return parametersArray;
+  };
+
+
+  /*
+      Builds a route from panel information.
+      Two modes:
+          - options has firstPanel and/or secondPanel attributes with the
+            panel(s) information.
+          - options has the panel information along a `direction` attribute
+            that can be `first` or `second`. It's the short version.
+   */
+
+  Router.prototype.buildUrl = function(options) {
+    var firstPanelInfo, firstPart, isFirstDirection, secondPanelInfo, secondPart, url;
+    if ((options.firstPanel != null) || (options.secondPanel != null)) {
+      firstPanelInfo = options.firstPanel || this.current.firstPanel;
+      secondPanelInfo = options.secondPanel || this.current.secondPanel;
+    } else {
+      if (options.direction != null) {
+        if (options.direction === 'first') {
+          firstPanelInfo = options;
+          secondPanelInfo = this.current.secondPanel;
+        } else if (options.direction === 'second') {
+          firstPanelInfo = this.current.firstPanel;
+          secondPanelInfo = options;
+        } else {
+          console.warn('`direction` should be `first`, `second`.');
+        }
+      } else {
+        console.warn('`direction` parameter is mandatory when ' + 'using short call.');
+      }
+    }
+    isFirstDirection = (options.firstPanel != null) || options.direction === 'first';
+    if (isFirstDirection && options.fullWidth) {
+      if ((options.secondPanel != null) && options.direction === 'second') {
+        console.warn("You shouldn't use the fullWidth option with " + "a second panel");
+      }
+      secondPanelInfo = null;
+    }
+    firstPart = this._getURLFromRoute(firstPanelInfo);
+    secondPart = this._getURLFromRoute(secondPanelInfo);
+    url = "#" + firstPart;
+    if ((secondPart != null) && secondPart.length > 0) {
+      url = "" + url + "/" + secondPart;
+    }
+    return url;
+  };
+
+
+  /*
+      Closes a panel given a direction. If a full-width panel is closed,
+      the URL points to the default route.
+   */
+
+  Router.prototype.buildClosePanelUrl = function(direction) {
+    var panelInfo;
+    if (direction === 'first' || direction === 'full') {
+      panelInfo = _.clone(this.current.secondPanel);
+    } else {
+      panelInfo = _.clone(this.current.firstPanel);
+    }
+    if (panelInfo != null) {
+      panelInfo.direction = 'first';
+      panelInfo.fullWidth = true;
+      return this.buildUrl(panelInfo);
+    } else {
+      return '#';
+    }
+  };
+
+  Router.prototype._getURLFromRoute = function(panel) {
+    var action, filledPattern, key, paramInPattern, paramValue, parameters, parametersInPattern, pattern, _i, _len;
+    panel = _.clone(panel);
+    if ((panel != null ? panel.parameters : void 0) != null) {
+      panel.parameters = _.clone(panel.parameters);
+    }
+    if (panel != null) {
+      pattern = this.patterns[panel.action].pattern;
+      if ((panel.parameters != null) && !(panel.parameters instanceof Array) && !(panel.parameters instanceof Object)) {
+        panel.parameters = [panel.parameters];
+      }
+      if ((panel.parameters != null) && panel.parameters instanceof Array) {
+        action = panel.action, parameters = panel.parameters;
+        panel.parameters = this._arrayToNamedParameters(action, parameters);
+      }
+      panel = this._mergeDefaultParameter(panel);
+      parametersInPattern = pattern.match(/:[\w]+/gi) || [];
+      filledPattern = pattern;
+      if (panel.parameters) {
+        for (_i = 0, _len = parametersInPattern.length; _i < _len; _i++) {
+          paramInPattern = parametersInPattern[_i];
+          key = paramInPattern.substr(1);
+          paramValue = panel.parameters[key];
+          filledPattern = filledPattern.replace(paramInPattern, paramValue);
+        }
+      }
+      return filledPattern;
+    } else {
+      return '';
+    }
+  };
+
+  Router.prototype._mergeDefaultParameter = function(panelInfo) {
+    var defaultParameter, defaultParameters, key, parameters;
+    panelInfo = _.clone(panelInfo);
+    parameters = _.clone(panelInfo.parameters || {});
+    if ((defaultParameters = this._getDefaultParameters(panelInfo.action)) != null) {
+      for (key in defaultParameters) {
+        defaultParameter = defaultParameters[key];
+        if (parameters[key] == null) {
+          parameters[key] = defaultParameter;
+        }
+      }
+    }
+    panelInfo.parameters = parameters;
+    return panelInfo;
+  };
+
+  return Router;
+
+})(Backbone.Router);
 });
 
 ;require.register("locales/en", function(exports, require, module) {
@@ -3313,7 +3601,7 @@ module.exports = {
 };
 });
 
-;require.register("mixins/RouterMixin", function(exports, require, module) {
+;require.register("mixins/router_mixin", function(exports, require, module) {
 
 /*
     Router mixin.
@@ -3338,7 +3626,7 @@ module.exports = {
 };
 });
 
-;require.register("mixins/StoreWatchMixin", function(exports, require, module) {
+;require.register("mixins/store_watch_mixin", function(exports, require, module) {
 var StoreWatchMixin;
 
 module.exports = StoreWatchMixin = function(stores) {
@@ -3372,9 +3660,9 @@ var AccountStore, PanelRouter, Router,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-PanelRouter = require('./libs/PanelRouter');
+PanelRouter = require('./libs/panel_router');
 
-AccountStore = require('./stores/AccountStore');
+AccountStore = require('./stores/account_store');
 
 module.exports = Router = (function(_super) {
   __extends(Router, _super);
@@ -3385,7 +3673,7 @@ module.exports = Router = (function(_super) {
 
   Router.prototype.patterns = {
     'account.config': {
-      pattern: 'account/:id/config',
+      pattern: 'account/:accountID/config',
       fluxAction: 'showConfigAccount'
     },
     'account.new': {
@@ -3393,7 +3681,7 @@ module.exports = Router = (function(_super) {
       fluxAction: 'showCreateAccount'
     },
     'account.mailbox.messages': {
-      pattern: 'account/:id/mailbox/:mailbox/page/:page',
+      pattern: 'account/:accountID/mailbox/:mailboxID/page/:page',
       fluxAction: 'showMessageList'
     },
     'search': {
@@ -3401,7 +3689,7 @@ module.exports = Router = (function(_super) {
       fluxAction: 'showSearch'
     },
     'message': {
-      pattern: 'message/:id',
+      pattern: 'message/:messageID',
       fluxAction: 'showConversation'
     },
     'compose': {
@@ -3424,14 +3712,23 @@ module.exports = Router = (function(_super) {
       case 'account.mailbox.messages':
         defaultAccount = AccountStore.getDefault();
         defaultMailbox = defaultAccount != null ? defaultAccount.get('mailboxes').first() : void 0;
-        defaultParameters = [defaultAccount != null ? defaultAccount.get('id') : void 0, defaultMailbox != null ? defaultMailbox.get('id') : void 0, 1];
+        defaultParameters = {
+          accountID: defaultAccount != null ? defaultAccount.get('id') : void 0,
+          mailboxID: defaultMailbox != null ? defaultMailbox.get('id') : void 0,
+          page: 1
+        };
         break;
       case 'account.config':
         defaultAccount = (_ref = AccountStore.getDefault()) != null ? _ref.get('id') : void 0;
-        defaultParameters = [defaultAccount];
+        defaultParameters = {
+          accountID: defaultAccount
+        };
         break;
       case 'search':
-        defaultParameters = ["", 1];
+        defaultParameters = {
+          query: "",
+          page: 1
+        };
         break;
       default:
         defaultParameters = null;
@@ -3444,16 +3741,16 @@ module.exports = Router = (function(_super) {
 })(PanelRouter);
 });
 
-;require.register("stores/AccountStore", function(exports, require, module) {
+;require.register("stores/account_store", function(exports, require, module) {
 var AccountStore, AccountTranslator, ActionTypes, Store,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-Store = require('../libs/flux/store/Store');
+Store = require('../libs/flux/store/store');
 
-ActionTypes = require('../constants/AppConstants').ActionTypes;
+ActionTypes = require('../constants/app_constants').ActionTypes;
 
-AccountTranslator = require('../utils/translators/AccountTranslator');
+AccountTranslator = require('../utils/translators/account_translator');
 
 AccountStore = (function(_super) {
 
@@ -3554,7 +3851,7 @@ AccountStore = (function(_super) {
   };
 
   AccountStore.prototype.getSelectedMailboxes = function(flatten) {
-    var getFlattenMailboxes, rawMailboxesTree;
+    var emptyMap, getFlattenMailboxes, rawMailboxesTree;
     if (flatten == null) {
       flatten = false;
     }
@@ -3582,7 +3879,8 @@ AccountStore = (function(_super) {
       };
       return getFlattenMailboxes(rawMailboxesTree).toOrderedMap();
     } else {
-      return (_selectedAccount != null ? _selectedAccount.get('mailboxes') : void 0) || Immutable.OrderedMap.empty();
+      emptyMap = Immutable.OrderedMap.empty();
+      return (_selectedAccount != null ? _selectedAccount.get('mailboxes') : void 0) || emptyMap;
     }
   };
 
@@ -3615,14 +3913,14 @@ AccountStore = (function(_super) {
 module.exports = new AccountStore();
 });
 
-;require.register("stores/LayoutStore", function(exports, require, module) {
+;require.register("stores/layout_store", function(exports, require, module) {
 var ActionTypes, LayoutStore, Store,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-Store = require('../libs/flux/store/Store');
+Store = require('../libs/flux/store/store');
 
-ActionTypes = require('../constants/AppConstants').ActionTypes;
+ActionTypes = require('../constants/app_constants').ActionTypes;
 
 LayoutStore = (function(_super) {
 
@@ -3686,21 +3984,21 @@ LayoutStore = (function(_super) {
 module.exports = new LayoutStore();
 });
 
-;require.register("stores/MessageStore", function(exports, require, module) {
+;require.register("stores/message_store", function(exports, require, module) {
 var AccountStore, ActionTypes, AppDispatcher, LayoutActionCreator, MessageStore, Store,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-Store = require('../libs/flux/store/Store');
+Store = require('../libs/flux/store/store');
 
-AppDispatcher = require('../AppDispatcher');
+AppDispatcher = require('../app_dispatcher');
 
-AccountStore = require('./AccountStore');
+AccountStore = require('./account_store');
 
-ActionTypes = require('../constants/AppConstants').ActionTypes;
+ActionTypes = require('../constants/app_constants').ActionTypes;
 
-LayoutActionCreator = require('../actions/LayoutActionCreator');
+LayoutActionCreator = require('../actions/layout_action_creator');
 
 MessageStore = (function(_super) {
 
@@ -3736,9 +4034,10 @@ MessageStore = (function(_super) {
       message.hasAttachments = Array.isArray(message.attachments) && message.attachments.length > 0;
       message = Immutable.Map(message);
       message.getReplyToAddress = function() {
-        var reply;
+        var from, reply;
         reply = this.get('replyTo');
-        reply = (reply == null) || reply.length === 0 ? this.get('from') : reply;
+        from = this.get('from');
+        reply = (reply == null) || reply.length === 0 ? from : reply;
         return reply;
       };
       _messages = _messages.set(message.get('id'), message);
@@ -3848,7 +4147,7 @@ MessageStore = (function(_super) {
   };
 
   MessageStore.prototype.getMessagesByConversation = function(messageID) {
-    var conversation, idToLook, idsToLook, temp;
+    var conversation, idToLook, idsToLook, newIdsToLook, temp;
     idsToLook = [messageID];
     conversation = [];
     while (idToLook = idsToLook.pop()) {
@@ -3856,9 +4155,10 @@ MessageStore = (function(_super) {
       temp = _messages.filter(function(message) {
         return message.get('inReplyTo') === idToLook;
       });
-      idsToLook = idsToLook.concat(temp.map(function(item) {
+      newIdsToLook = temp.map(function(item) {
         return item.get('id');
-      }).toArray());
+      }).toArray();
+      idsToLook = idsToLook.concat(newIdsToLook);
     }
     return conversation;
   };
@@ -3870,14 +4170,14 @@ MessageStore = (function(_super) {
 module.exports = new MessageStore();
 });
 
-;require.register("stores/SearchStore", function(exports, require, module) {
+;require.register("stores/search_store", function(exports, require, module) {
 var ActionTypes, SearchStore, Store,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-Store = require('../libs/flux/store/Store');
+Store = require('../libs/flux/store/store');
 
-ActionTypes = require('../constants/AppConstants').ActionTypes;
+ActionTypes = require('../constants/app_constants').ActionTypes;
 
 SearchStore = (function(_super) {
 
@@ -3943,14 +4243,14 @@ SearchStore = (function(_super) {
 module.exports = new SearchStore();
 });
 
-;require.register("stores/SettingsStore", function(exports, require, module) {
+;require.register("stores/settings_store", function(exports, require, module) {
 var ActionTypes, SettingsStore, Store,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-Store = require('../libs/flux/store/Store');
+Store = require('../libs/flux/store/store');
 
-ActionTypes = require('../constants/AppConstants').ActionTypes;
+ActionTypes = require('../constants/app_constants').ActionTypes;
 
 SettingsStore = (function(_super) {
 
@@ -4007,7 +4307,7 @@ SettingsStore = (function(_super) {
 module.exports = new SettingsStore();
 });
 
-;require.register("utils/MessageUtils", function(exports, require, module) {
+;require.register("utils/message_utils", function(exports, require, module) {
 module.exports = {
   displayAddresses: function(addresses, full) {
     var item, res, _i, _len;
@@ -4066,11 +4366,11 @@ module.exports = {
           case "msword":
           case "vnd.ms-word":
           case "vnd.oasis.opendocument.text":
-          case "vnd.openxmlformats-officedocument.wordprocessingml.document":
+          case "vnd.openxmlformats-officedocument.wordprocessingm" + "l.document":
             return "word";
           case "vns.ms-powerpoint":
           case "vnd.oasis.opendocument.presentation":
-          case "vnd.openxmlformats-officedocument.presentationml.presentation":
+          case "vnd.openxmlformats-officedocument.presentationml." + "presentation":
             return "presentation";
           case "pdf":
             return sub[1];
@@ -4083,14 +4383,47 @@ module.exports = {
 };
 });
 
-;require.register("utils/XHRUtils", function(exports, require, module) {
+;require.register("utils/translators/account_translator", function(exports, require, module) {
+var toRawObject;
+
+module.exports = {
+  toImmutable: function(rawAccount) {
+    var _createImmutableMailboxes;
+    _createImmutableMailboxes = function(children) {
+      return Immutable.Sequence(children).mapKeys(function(_, mailbox) {
+        return mailbox.id;
+      }).map(function(mailbox) {
+        children = mailbox.children;
+        mailbox.children = _createImmutableMailboxes(children);
+        return Immutable.Map(mailbox);
+      }).toOrderedMap();
+    };
+    rawAccount.mailboxes = _createImmutableMailboxes(rawAccount.mailboxes);
+    return Immutable.Map(rawAccount);
+  },
+  toRawObject: toRawObject = function(account) {
+    var mailboxes, _createRawObjectMailboxes;
+    _createRawObjectMailboxes = function(children) {
+      return children != null ? children.map(function(child) {
+        children = child.get('children');
+        return child.set('children', _createRawObjectMailboxes(children));
+      }).toVector() : void 0;
+    };
+    mailboxes = account.get('mailboxes');
+    account = account.set('mailboxes', _createRawObjectMailboxes(mailboxes));
+    return account.toJS();
+  }
+};
+});
+
+;require.register("utils/xhr_utils", function(exports, require, module) {
 var AccountTranslator, SettingsStore, request;
 
 request = superagent;
 
-AccountTranslator = require('./translators/AccountTranslator');
+AccountTranslator = require('./translators/account_translator');
 
-SettingsStore = require('../stores/SettingsStore');
+SettingsStore = require('../stores/settings_store');
 
 module.exports = {
   fetchConversation: function(emailID, callback) {
@@ -4156,36 +4489,6 @@ module.exports = {
         return callback(res.body, null);
       }
     });
-  }
-};
-});
-
-;require.register("utils/translators/AccountTranslator", function(exports, require, module) {
-var toRawObject;
-
-module.exports = {
-  toImmutable: function(rawAccount) {
-    var _createImmutableMailboxes;
-    _createImmutableMailboxes = function(children) {
-      return Immutable.Sequence(children).mapKeys(function(_, mailbox) {
-        return mailbox.id;
-      }).map(function(mailbox) {
-        mailbox.children = _createImmutableMailboxes(mailbox.children);
-        return Immutable.Map(mailbox);
-      }).toOrderedMap();
-    };
-    rawAccount.mailboxes = _createImmutableMailboxes(rawAccount.mailboxes);
-    return Immutable.Map(rawAccount);
-  },
-  toRawObject: toRawObject = function(account) {
-    var _createRawObjectMailboxes;
-    _createRawObjectMailboxes = function(children) {
-      return children != null ? children.map(function(child) {
-        return child.set('children', _createRawObjectMailboxes(child.get('children')));
-      }).toVector() : void 0;
-    };
-    account = account.set('mailboxes', _createRawObjectMailboxes(account.get('mailboxes')));
-    return account.toJS();
   }
 };
 });

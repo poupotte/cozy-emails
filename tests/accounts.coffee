@@ -4,12 +4,13 @@ client = helpers.getClient()
 
 describe "Accounts Tests", ->
 
+    before helpers.cleanDB
     before helpers.loadFixtures
     before helpers.startImapServer
     before helpers.startApp
     after helpers.stopApp
 
-    describe "Account creation", ->
+    describe "Account creation", =>
 
         it "When I get the index", (done) ->
             @timeout 6000
@@ -51,25 +52,58 @@ describe "Accounts Tests", ->
                 # body[0].conversationID.should.equal body[1].conversationID
                 done()
 
-    describe "Account recovering", ->
+    describe "Recover all accounts", ->
 
-        it "When I recover account list", (done)->
+        it "When I recover accounts list", (done)->
             client.get '/account', (err, res, body) =>
                 res.statusCode.should.equal 200
                 @body = body
-                console.log body
                 done()
 
         it "Then list should be contained new account", ->
             @body.should.have.lengthOf 3
             @body[0].label.should.equal "New Name"
-            @body[1].label.should.equal "Dovecot"
+            @body[1].label.should.equal "DoveCot"
             @body[2].label.should.equal "Gmail"
 
+    describe "Recover a specific account", =>
 
-    describe "Account removal", ->
+        it "When I recover account detail", (done) =>
+            client.get "/account/#{@accountID}", (err, res, result) =>
+                res.statusCode.should.equal 200
+                @body = result
+                done()
+
+        it "Then list should be contained new account", =>
+            @body.label.should.equal "New Name"
+            @body.login.should.equal "testuser"
+            @body.password.should.equal "applesauce"
+            @body.mailboxes.should.have.lengthOf 4
+
+    describe "Try to recover a non existing account", =>
+
+        it "When I recover account detail", (done) =>
+            client.get "/account/3", (err, res, result) =>
+                @statusCode = res.statusCode
+                done()
+
+        it "Then 404 should be returned as error code", =>
+            @statusCode.should.equal 404
+
+    describe "Account removal", =>
 
         it "When I delete an account", (done) =>
             client.del "/account/#{@accountID}", (err, res, body) =>
                 res.statusCode.should.equal 204
                 done()
+
+        it "And I recover all accounts", (done) ->
+            client.get "/account", (err, res, body) =>
+                res.statusCode.should.equal 200
+                @body = body
+                done()
+
+        it "And account should be removal from list", ->
+            @body.should.have.lengthOf 2
+            @body[0].label.should.equal "DoveCot"
+            @body[1].label.should.equal "Gmail"

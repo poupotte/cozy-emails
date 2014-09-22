@@ -7,12 +7,23 @@ Client = require('request-json').JsonClient
 
 helpers = {}
 
+if process.env.COVERAGE
+    helpers.prefix = '../instrumented/'
+else if process.env.USE_JS
+    helpers.prefix = '../build/'
+else
+    helpers.prefix = '../'
+
 # server management
 helpers.options =
     serverPort: '8888'
     serverHost: 'localhost'
 helpers.app = null
 client = new Client "http://#{helpers.options.serverHost}:#{helpers.options.serverPort}/"
+
+# set the configuration for the server
+process.env.HOST = helpers.options.serverHost
+process.env.PORT = helpers.options.serverPort
 
 helpers.getClient = -> client
 
@@ -30,20 +41,16 @@ helpers.imapServerAccount = ->
     label: "DoveCot"
     login: "testuser"
     password: "applesauce"
-    smtpServer: "172.0.0.1"
+    smtpServer: "172.31.1.2"
     smtpPort: 0
-    imapServer: "127.0.0.1"
+    imapServer: "172.31.1.2"
     imapPort: 993
     imapSecure: true
 
+initializeApplication = require "#{helpers.prefix}server"
 helpers.startApp = (done) ->
     @timeout 10000
-    americano = require 'americano'
-
-    host = helpers.options.serverHost || "127.0.0.1"
-    port = helpers.options.serverPort || 9250
-
-    americano.start name: 'template', host: host, port: port, (app, server) =>
+    initializeApplication (app, server) =>
         @app = app
         @app.server = server
         done()
