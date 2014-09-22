@@ -41,9 +41,11 @@ helpers.imapServerAccount = ->
     label: "DoveCot"
     login: "testuser"
     password: "applesauce"
-    smtpServer: "172.31.1.2"
+    #smtpServer: "172.31.1.2"
+    smptServer:"172.0.0.1"
     smtpPort: 0
-    imapServer: "172.31.1.2"
+    #imapServer: "172.31.1.2"
+    imapServer: "127.0.0.1"
     imapPort: 993
     imapSecure: true
 
