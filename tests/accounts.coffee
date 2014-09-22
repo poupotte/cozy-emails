@@ -38,12 +38,12 @@ describe "Accounts Tests", ->
             @timeout 30000
             setTimeout done, 29000
 
-        it "Then I get a mailbox count", (done) ->
+        it "Then I get a mailbox count", (done) =>
             client.get "/mailbox/#{@mailboxID}/count", (err, res, body) =>
                 body.should.have.property 'count', 7
                 done()
 
-        it "And I get a mailbox", (done) ->
+        it "And I get a mailbox", (done) =>
             client.get "/mailbox/#{@mailboxID}/page/1/limit/3", (err, res, body) =>
                 body.should.have.lengthOf 3
                 body[0].subject.should.equal 'Flagged Orange'
@@ -57,6 +57,7 @@ describe "Accounts Tests", ->
             client.get '/account', (err, res, body) =>
                 res.statusCode.should.equal 200
                 @body = body
+                console.log body
                 done()
 
         it "Then list should be contained new account", ->
