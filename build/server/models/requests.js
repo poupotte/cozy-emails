@@ -37,7 +37,7 @@ module.exports = {
     },
     byNormSubject: function(doc) {
       if (doc.normSubject) {
-        return emit(doc.normSubject, doc.threadId);
+        return emit([doc.accountID, doc.normSubject], doc.conversationID);
       }
     }
   }

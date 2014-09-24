@@ -11,6 +11,7 @@ module.exports = Message = americano.getModel 'Message',
     conversationID: String   # all message in thread have same conversationID
     mailboxIDs: (x) -> x     # mailboxes where this message appears
                              # as an hash {boxID:uid, boxID2:uid2}
+    flags: (x) -> x          # [String] flags of the message
     headers: (x) -> x        # hash of the message headers
     from: (x) -> x           # array of {name, address}
     to: (x) -> x             # array of {name, address}
@@ -24,11 +25,11 @@ module.exports = Message = americano.getModel 'Message',
     html: String             # message content as html
     date: Date               # message date
     priority: String         # message priority
-    headers: (x) -> x        # hash of message headers
     attachments: (x) -> x    # array of message attachments objects
                                 # {contentType, fileName, generatedFileName,
                                 # contentDisposition, contentId,
                                 # transferEncoding, length, checksum}
+    flags: (x) -> x          # array of message flags (Seen, Flagged, Draft)
 
 
 # return a promise for an Array of Message object
@@ -61,13 +62,14 @@ Message.countByMailbox = (mailboxID) ->
 
 # given a mailbox
 # get the uids present in the cozy
+# return an array of [couchdID, messageUID]
 Message.getUIDs = (mailboxID) ->
     Message.rawRequestPromised 'byMailboxAndDate',
         startkey: [mailboxID]
         endkey: [mailboxID, {}]
         reduce: false
 
-    .map (row) -> row.value
+    .map (row) -> [row.id, row.value]
 
 # find a message by its message id
 Message.byMessageId = (accountID, messageID) ->
@@ -81,6 +83,10 @@ Message.byMessageId = (accountID, messageID) ->
 # add the message to a box
 Message::addToMailbox = (box, uid) ->
     @mailboxIDs[box.id] = uid
+    @savePromised()
+
+Message::removeFromMailbox = (box) ->
+    delete @mailboxIDs[box.id]
     @savePromised()
 
 # create a message from a raw imap message
@@ -151,7 +157,6 @@ Message.findConversationIdByMessageIds = (mail) ->
     # find all messages in references
     Message.rawRequestPromised 'byMessageId',
         keys: messageIds.map (id) -> [mail.accountID, id]
-        reduce: true
 
     # and get a conversationID from them
     .then Message.pickConversationID
@@ -178,7 +183,7 @@ Message.findConversationIdBySubject = (mail) ->
 # and return it
 Message.pickConversationID = (rows) ->
     conversationIDCounts = {}
-    rows.forEach (result, row) ->
+    for row in rows
         conversationIDCounts[row.value] ?= 1
         conversationIDCounts[row.value]++
 

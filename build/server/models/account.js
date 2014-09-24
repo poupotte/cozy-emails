@@ -55,7 +55,7 @@ Account.createIfValid = function(data) {
   account = null;
   rawBoxesTree = null;
   return Imap.fetchBoxesTree(data).then(function(boxes) {
-    console.log("GOT", boxes, "BOXES");
+    console.log("GOT", boxes.length, "BOXES");
     rawBoxesTree = boxes;
     return Account.createPromised(data);
   }).then(function(created) {

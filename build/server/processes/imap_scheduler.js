@@ -17,17 +17,6 @@ module.exports = ImapScheduler = (function() {
     return this.instances[account.imapServer];
   };
 
-  ImapScheduler.summary = function() {
-    var instance, out, server, _ref;
-    out = {};
-    _ref = this.instances;
-    for (server in _ref) {
-      instance = _ref[server];
-      out[server] = instance.tasks;
-    }
-    return out;
-  };
-
   ImapScheduler.prototype.tasks = [];
 
   ImapScheduler.prototype.pendingTask = null;
@@ -55,8 +44,7 @@ module.exports = ImapScheduler = (function() {
       tls: (this.account.imapSecure == null) || this.account.imapSecure,
       tlsOptions: {
         rejectUnauthorized: false
-      },
-      debug: console.log
+      }
     });
     this.imap.onTerminated = (function(_this) {
       return function() {
@@ -81,7 +69,7 @@ module.exports = ImapScheduler = (function() {
   };
 
   ImapScheduler.prototype.closeConnection = function(hard) {
-    console.log("CLOSING CONNECTION hard=", hard);
+    console.log("CLOSING CONNECTION", (hard ? "HARD" : ""));
     return this.imap.end(hard).then((function(_this) {
       return function() {
         console.log("CLOSED CONNECTION");

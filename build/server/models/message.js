@@ -17,6 +17,9 @@ module.exports = Message = americano.getModel('Message', {
   mailboxIDs: function(x) {
     return x;
   },
+  flags: function(x) {
+    return x;
+  },
   headers: function(x) {
     return x;
   },
@@ -46,10 +49,10 @@ module.exports = Message = americano.getModel('Message', {
   html: String,
   date: Date,
   priority: String,
-  headers: function(x) {
+  attachments: function(x) {
     return x;
   },
-  attachments: function(x) {
+  flags: function(x) {
     return x;
   }
 });
@@ -96,7 +99,7 @@ Message.getUIDs = function(mailboxID) {
     endkey: [mailboxID, {}],
     reduce: false
   }).map(function(row) {
-    return row.value;
+    return [row.id, row.value];
   });
 };
 
@@ -114,6 +117,11 @@ Message.byMessageId = function(accountID, messageID) {
 
 Message.prototype.addToMailbox = function(box, uid) {
   this.mailboxIDs[box.id] = uid;
+  return this.savePromised();
+};
+
+Message.prototype.removeFromMailbox = function(box) {
+  delete this.mailboxIDs[box.id];
   return this.savePromised();
 };
 
@@ -183,8 +191,7 @@ Message.findConversationIdByMessageIds = function(mail) {
   return Message.rawRequestPromised('byMessageId', {
     keys: messageIds.map(function(id) {
       return [mail.accountID, id];
-    }),
-    reduce: true
+    })
   }).then(Message.pickConversationID);
 };
 
@@ -199,15 +206,15 @@ Message.findConversationIdBySubject = function(mail) {
 };
 
 Message.pickConversationID = function(rows) {
-  var change, conversationID, conversationIDCounts, count, pickedConversationID, pickedConversationIDCount;
+  var change, conversationID, conversationIDCounts, count, pickedConversationID, pickedConversationIDCount, row, _i, _len, _name;
   conversationIDCounts = {};
-  rows.forEach(function(result, row) {
-    var _name;
+  for (_i = 0, _len = rows.length; _i < _len; _i++) {
+    row = rows[_i];
     if (conversationIDCounts[_name = row.value] == null) {
       conversationIDCounts[_name] = 1;
     }
-    return conversationIDCounts[row.value]++;
-  });
+    conversationIDCounts[row.value]++;
+  }
   pickedConversationID = null;
   pickedConversationIDCount = 0;
   for (conversationID in conversationIDCounts) {
